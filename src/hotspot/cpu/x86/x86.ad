@@ -9296,6 +9296,17 @@ instruct cmovI_memUCF(cmpOpUCF cop, rFlagsRegUCF cr, rRegI dst, memory src) %{
   %}
 %}
 
+instruct cmovI_memUCFE(cmpOpUCFE cop, rFlagsRegUCFE cr, rRegI dst, memory src) %{
+  match(Set dst (CMoveI (Binary cop cr) (Binary dst (LoadI src))));
+
+  ins_cost(250); // XXX
+  format %{ "cmovl$cop $dst, $src\t# unsigned, int" %}
+  ins_encode %{
+    __ cmovl((Assembler::Condition)($cop$$cmpcode), $dst$$Register, $src$$Address);
+  %}
+  ins_pipe(pipe_cmov_mem);
+%}
+
 // Conditional move
 instruct cmovN_reg(rRegN dst, rRegN src, rFlagsReg cr, cmpOp cop)
 %{
@@ -9698,6 +9709,17 @@ instruct cmovL_memUCF(cmpOpUCF cop, rFlagsRegUCF cr, rRegL dst, memory src) %{
   expand %{
     cmovL_memU(cop, cr, dst, src);
   %}
+%}
+
+instruct cmovL_memUCFE(cmpOpUCFE cop, rFlagsRegUCFE cr, rRegL dst, memory src) %{
+  match(Set dst (CMoveL (Binary cop cr) (Binary dst (LoadL src))));
+
+  ins_cost(200); // XXX
+  format %{ "cmovq$cop $dst, $src\t# unsigned, long" %}
+  ins_encode %{
+    __ cmovq((Assembler::Condition)($cop$$cmpcode), $dst$$Register, $src$$Address);
+  %}
+  ins_pipe(pipe_cmov_mem); // XXX
 %}
 
 instruct cmovF_reg(cmpOp cop, rFlagsReg cr, regF dst, regF src)
