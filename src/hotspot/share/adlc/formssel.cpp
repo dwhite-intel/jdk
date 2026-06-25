@@ -1143,6 +1143,19 @@ bool equivalent_predicates( const InstructForm *instr1, const InstructForm *inst
     // no predicates means they are identical
     return true;
   }
+
+  #define PREDICATE_FALSE_EXPR "#line 9\nfalse\n#line 9\n"
+
+  if( pred2 == nullptr && !ADLParser::equivalent_expressions(pred1->_pred, PREDICATE_FALSE_EXPR) ) {
+    // If the replacement instr (instr2) has no predicate, then it handles a superset of the cases that instr1 handles.
+    // Except for predicate(false) which shouldn't match anything.
+    // if ( false ) {
+    //   fprintf(stderr, "Instruction %s cisc-spills-to %s\n", instr1->_ident, instr2->_ident);
+    //   fprintf(stderr, "   predicate %s\n",  pred1->_pred);
+    // }
+    return true;
+  }
+
   if( pred1 != nullptr && pred2 != nullptr ) {
     // compare the predicates
     if (ADLParser::equivalent_expressions(pred1->_pred, pred2->_pred)) {
